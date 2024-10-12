@@ -16,7 +16,7 @@ Característica: Crear una mascota
     """
     {
       "especie_id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
     Entonces el sistema retorna el código 200
@@ -26,6 +26,6 @@ Característica: Crear una mascota
     {
       "id": [NUMBER],
       "especie_id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """

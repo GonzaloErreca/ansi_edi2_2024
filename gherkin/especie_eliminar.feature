@@ -17,7 +17,7 @@ Característica: Eliminar una especie
     """
     {
       "id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
 
@@ -35,6 +35,6 @@ Característica: Eliminar una especie
     Y el objeto es un JSON que respeta el formato:
     """
     {
-      "message": [STRING]
+      "mensaje": [STRING]
     }
     """

@@ -9,7 +9,7 @@ Característica: Liberar (eliminar) un turno pedido
     E identificado por la fecha y hora
     Cuando el admin elimina el turno
     Y la acción se realiza a través de la API REST
-    Y la llamada se hace a la ruta '/turno/{YYYY-MM-DDThh:mm:ss±hh:mm}/{mascota_id}'
+    Y la llamada se hace a la ruta '/turno/{YYYYMMDDThhmmssZ}/{mascota_id}'
     Y el verbo HTTP es 'DELETE'
     Entonces el sistema retorna el código 200
     Y un objeto representando al turno liberado

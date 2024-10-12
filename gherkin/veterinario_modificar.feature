@@ -15,7 +15,7 @@ Característica: Modificar un veterinario
     Y se envía un objeto JSON que respeta el formato:
     """
     {
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
     Entonces el sistema retorna el código 200
@@ -24,6 +24,6 @@ Característica: Modificar un veterinario
     """
     {
       "id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """

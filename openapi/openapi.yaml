@@ -1,0 +1,515 @@
+openapi: 3.1.0
+info:
+  title: "Sistema de Reservas de Turnos Veterinarios"
+  description: |
+    Esta API permite gestionar un sistema de mascotas, veterinarios y turnos.
+  version: "0.1"
+
+# ------------------------------------------------
+# Definición de rutas
+# ------------------------------------------------
+
+paths:
+
+
+  # Rutas para el manejo de especies
+  # --------------------------------
+
+  /especie:
+
+    post:
+      summary: "Crear una especie"
+      description: "Se agrega una especie animal al sistema"
+      operationId: "especie-crear"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requestBodies/Nombre"
+      responses:
+        '200':
+          description: "Especie creada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Especie"
+        '403':
+          description: "Especie existente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/assets/Mensaje"
+              example:
+                mensaje: "La especie que intenta agregar ya existe"
+        '422':
+          description: "Solicitud invalida"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/assets/Mensaje"
+              example:
+                mensaje: "Nombre de especie inválido"
+
+    get:
+      summary: "Listar las especies"
+      description: "Se listan las especies cargadas en el sistema."
+      operationId: "especie-listar"
+      responses:
+        '200':
+          description: "Lista de especies disponibles en el sistema"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Especie"
+
+  /especie/{id}:
+
+    put:
+      summary: "Actualizar una especie"
+      description: "Se actualiza una especie del sistema"
+      operationId: "especie-editar"
+      parameters:
+        - name: id
+          in: path
+          description: "ID de la especie a actualizar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requestBodies/Nombre"
+      responses:
+        '200':
+          description: "Especie actualizada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Especie"
+        '404':
+          description: "Especie no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/assets/Mensaje"
+              example:
+                mensaje: "ID invalido o inexistente"
+
+    delete:
+      summary: "Eliminar una especie"
+      description: "Se elimina una especie del sistema"
+      operationId: "especie-eliminar"
+      parameters:
+        - name: id
+          in: path
+          description: "ID de la especie a eliminar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      responses:
+        '200':
+          description: "Especie eliminada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Especie"
+        '404':
+          description: "Especie no encontrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/assets/Mensaje"
+              example:
+                mensaje: "ID invalido o inexistente"
+
+
+  # Rutas para el manejo de veterinarios
+  # ------------------------------------
+
+  /veterinario:
+
+    post:
+      summary: "Crear un veterinario"
+      description: "Se carga un veterinario en el sistema"
+      operationId: "veterinario-crear"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requestBodies/Nombre"
+      responses:
+        '200':
+          description: "Veterinario creado exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Veterinario"
+
+    get:
+      summary: "Listar los veterinarios"
+      description: "Permite listar los veterinarios cargados en el sistema."
+      operationId: "veterinario-listar"
+      responses:
+        '200':
+          description: "Lista de veterinarios disponibles en el sistema"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Veterinario"
+
+  /veterinario/{id}:
+
+    put:
+      summary: "Actualiza un veterinario"
+      description: "Se actualiza un veterinario del sistema"
+      operationId: "veterinario-editar"
+      parameters:
+        - name: id
+          in: path
+          description: "ID del veterinario a actualizar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requestBodies/Nombre"
+      responses:
+        '200':
+          description: "Veterinario actualizado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Veterinario"
+
+    delete:
+      summary: "Eliminar un veterinario"
+      description: "Se elimina un veterinario del sistema"
+      operationId: "veterinario-eliminar"
+      parameters:
+        - name: id
+          in: path
+          description: "ID del veterinario a eliminar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      responses:
+        '200':
+          description: "Veterinario eliminado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Veterinario"
+
+
+  # Rutas para el manejo de mascotas
+  # --------------------------------
+
+  /mascota:
+
+    post:
+      summary: "Crea una mascota"
+      description: "Se carga una mascota al sistema"
+      operationId: "mascota-crear"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/requestBodies/Especie"
+                - $ref: "#/components/requestBodies/Nombre"
+      responses:
+        '200':
+          description: "Mascota creada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mascota"
+
+    get:
+      summary: "Lisgtar las mascotas"
+      description: "Se listan las mascotas cargadas en el sistema."
+      operationId: "mascota-listar"
+      responses:
+        '200':
+          description: "Lista de mascotas cargadas en el sistema"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mascota"
+
+  /mascota/{id}:
+
+    put:
+      summary: "Actualizar una mascota"
+      description: "Se actualiza una mascota del sistema"
+      operationId: "mascota-editar"
+      parameters:
+        - name: id
+          in: path
+          description: "ID de la mascota a actualizar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/requestBodies/Especie"
+                - $ref: "#/components/requestBodies/Nombre"
+      responses:
+        '200':
+          description: "Mascota actualizada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mascota"
+
+    delete:
+      summary: "Eliminar una mascota"
+      description: "Se elimina una mascota del sistema"
+      operationId: "mascota-eliminar"
+      parameters:
+        - name: id
+          in: path
+          description: "ID de la mascota a eliminar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      responses:
+        '200':
+          description: "Mascota eliminada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mascota"
+
+
+  # Rutas para el manejo de turnos
+  # ------------------------------
+
+  /disponibles:
+    get:
+      summary: "Turnos disponibles"
+      description: "Lista de turnos disponibles"
+      operationId: "turno-disponibles"
+      responses:
+        '200':
+          description: "Lista de turnos disponibles"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/primitives/FechaHora"
+
+  /turno:
+
+    post:
+      summary: "Tomar un turno"
+      description: "Se toma un turno disponible"
+      operationId: "turno-crear"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requestBodies/Turno"
+      responses:
+        '200':
+          description: "Turno asignado exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Turno"
+
+    get:
+      summary: "Listar los turnos"
+      description: "Se listan los turnos asignados"
+      operationId: "turno-listar"
+      responses:
+        '200':
+          description: "Lista de turnos asignados"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TurnoLista"
+
+  /turno/{turno}/{mascota_id}:
+
+    delete:
+      summary: "Libera un turno"
+      description: "Se libera un turno tomado en el sistema"
+      operationId: "turno-eliminar"
+      parameters:
+        - name: turno
+          in: path
+          description: "Fecha y hora del turno a liberar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/FechaHora"
+        - name: mascota_id
+          in: path
+          description: "ID de la mascota asociada al turno a liberar"
+          required: true
+          schema:
+            $ref: "#/components/primitives/Identificador"
+            example: 1
+      responses:
+        '200':
+          description: "Turno liberado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Turno"
+
+# ------------------------------------------------
+# Definición de componentes
+# ------------------------------------------------
+
+components:
+
+  # Tipos de datos
+  # --------------
+
+  primitives:
+
+    Identificador:
+      type: integer
+      format: int32
+      minimum: 1
+
+    FechaHora:
+      type: string
+      pattern: '^(\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])T([0-1][0-9]|2[0-4])([0-5][0-9])([0-5][0-9])Z$'
+      description: "Formato personalizado de la fecha y hora del turno ('YYYYMMDDThhmmssZ')"
+      example: "20241231T245959Z"
+
+  # Propiedades
+  # -----------
+
+  assets:
+
+    Mensaje:
+      type: object
+      required:
+        - mensaje
+      properties:
+        mensaje:
+          type: string
+
+    Identificador:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/primitives/Identificador"
+
+    Nombre:
+      type: object
+      required:
+        - nombre
+      properties:
+        nombre:
+          type: string
+
+    EspecieID:
+      type: object
+      required:
+        - especie_id
+      properties:
+        especie_id:
+          $ref: "#/components/primitives/Identificador"
+
+    MascotaID:
+      type: object
+      required:
+        - mascota_id
+      properties:
+        mascota_id:
+          $ref: "#/components/primitives/Identificador"
+
+    VeterinarioID:
+      type: object
+      required:
+        - veterinario_id
+      properties:
+        veterinario_id:
+          $ref: "#/components/primitives/Identificador"
+
+    Turno:
+      type: object
+      required:
+        - turno
+      properties:
+        turno:
+          $ref: "#/components/primitives/FechaHora"
+
+  # Esquemas
+  # --------
+
+  schemas:
+
+    Especie:
+      allOf:
+        - $ref: "#/components/assets/Identificador"
+        - $ref: "#/components/assets/Nombre"
+
+    Veterinario:
+      allOf:
+        - $ref: "#/components/assets/Identificador"
+        - $ref: "#/components/assets/Nombre"
+
+    Mascota:
+      allOf:
+        - $ref: "#/components/assets/Identificador"
+        - $ref: "#/components/assets/EspecieID"
+        - $ref: "#/components/assets/Nombre"
+
+    Turno:
+      allOf:
+        - $ref: "#/components/assets/Turno"
+        - $ref: "#/components/assets/MascotaID"
+
+    TurnoLista:
+      allOf:
+        - $ref: "#/components/schemas/Turno"
+        - $ref: "#/components/assets/VeterinarioID"
+
+  # Cuerpos de las solicitudes
+  # --------------------------
+
+  requestBodies:
+
+    Nombre:
+      $ref: "#/components/assets/Nombre"
+
+    Especie:
+      $ref: "#/components/assets/EspecieID"
+
+    Turno:
+      $ref: "#/components/schemas/Turno"

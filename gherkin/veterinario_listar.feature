@@ -18,7 +18,7 @@ Característica: Listar los veterinarios
     [
       {
         "id": [NUMBER],
-        "name": [STRING]
+        "nombre": [STRING]
       }
     ]
     """

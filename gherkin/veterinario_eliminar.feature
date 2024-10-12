@@ -17,6 +17,6 @@ Característica: Eliminar un veterinario
     """
     {
       "id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """

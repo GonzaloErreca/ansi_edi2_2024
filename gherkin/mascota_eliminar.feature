@@ -18,6 +18,6 @@ Característica: Eliminar una mascota
     {
       "id": [NUMBER],
       "especie_id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
