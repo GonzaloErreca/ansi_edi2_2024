@@ -1,5 +1,7 @@
 Fake REST API
--------------
+
+=============
+=======
 
 A continuación se documentan dos formas de crear un servicio que ejecute una REST API falsa, basada en la documentación OpenAPI (archivo YAML).
 
@@ -33,6 +35,8 @@ prism mock -d openapi.yaml
 # ... trabajar ...
 deactivate
 ```
+
+=======
 
 También existe otra herramienta llamada [mockoon](https://github.com/mockoon/mockoon).
 

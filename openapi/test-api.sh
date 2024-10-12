@@ -71,6 +71,7 @@ function msg {
         echo -e "${gr}[✅ SUCCESS] ${message}${nc}"
     elif [[ 'f' == "${flag}" ]]; then
         echo -e "${rd}[❌ FAILURE] ${message}${nc}"
+=======
         if [[ "true" == "${STOP_ON_FAILURE}" ]]; then
             exit 1
         fi
@@ -278,7 +279,6 @@ function elementDelete {
 }
 
 # ====================================================================
-
 # --------------------------------------
 # Test the creation of a species
 #
@@ -639,3 +639,4 @@ testListSpecies 2 "${SPECIES_CAT_ID}" "${SPECIES_CAT_NAME}"
 PET_NAME='bobby'
 testCreatePet "${NEW_ID}" "${PET_NAME}"
 NEW_ID_PET 1
+

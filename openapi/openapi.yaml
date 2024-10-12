@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
   title: "Sistema de Reservas de Turnos Veterinarios"
-  description: |
-    Esta API permite gestionar un sistema de mascotas, veterinarios y turnos.
+  description: Esta API permite gestionar un sistema de mascotas, veterinarios y turnos.
   version: "0.1"
 
+=======
 # ------------------------------------------------
 # Definición de rutas
 # ------------------------------------------------
@@ -26,6 +26,11 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                name:
+                  type: string
+=======
               $ref: "#/components/requestBodies/Nombre"
       responses:
         '200':
@@ -33,6 +38,45 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '400':
+          description: "Solicitud mal formada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Ingreso no válido"
+        '409':
+          description: "Especie ya existe"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "La especie ya existe en la DDBB."
+    get:
+      summary: "Se listan las especies"
+      description: "Permite listar las especies cargadas en el sistema."
+      responses:
+        '200':
+          description: "Se listan correctamente las especies cargadas en la BBDD"
+=======
                 $ref: "#/components/schemas/Especie"
         '403':
           description: "Especie existente"
@@ -63,6 +107,53 @@ paths:
               schema:
                 type: array
                 items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+
+  /especie/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: "Traer una especie"
+      description: "Permite traer una especie requerida"
+      operationId: "listar-especie"
+      responses:
+        '200':
+          description: "Se lista correctamente la especie pedida en la BBDD"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '404':
+          description: "Especie no encontrada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "La especie no existe en la DDBB."
+    put:
+      summary: "Actualiza una especie"
+      description: "Actualiza una especie en la base de datos"
+=======
                   $ref: "#/components/schemas/Especie"
 
   /especie/{id}:
@@ -84,6 +175,23 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: "Se actualiza una especie"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+=======
               $ref: "#/components/requestBodies/Nombre"
       responses:
         '200':
@@ -97,6 +205,28 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "La especie no existe en la DDBB."
+    delete:
+      summary: "Elimina una especie"
+      description: "Elimina una especie de la base de datos"
+      responses:
+        '200':
+          description: "Se elimina una especie"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+=======
                 $ref: "#/components/assets/Mensaje"
               example:
                 mensaje: "ID invalido o inexistente"
@@ -125,6 +255,21 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "La especie no existe en la DDBB."
+
+  /veterinario:
+    post:
+      summary: "Crea un veterinario"
+      description: "Carga un veterinario en la base de datos"
+      operationId: "crear-veterinario"
+=======
                 $ref: "#/components/assets/Mensaje"
               example:
                 mensaje: "ID invalido o inexistente"
@@ -144,6 +289,11 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                name:
+                  type: string
+=======
               $ref: "#/components/requestBodies/Nombre"
       responses:
         '200':
@@ -151,6 +301,45 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '400':
+          description: "Solicitud mal formada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Ingreso no válido"
+        '409':
+          description: "Veterinario ya existe"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "El veterinario ya existe en la DDBB."
+    get:
+      summary: "Se listan los veterinarios"
+      description: "Permite listar los veterinarios cargados en el sistema."
+      responses:
+        '200':
+          description: "Se listan correctamente los veterinarios cargados en la BBDD"
+=======
                 $ref: "#/components/schemas/Veterinario"
 
     get:
@@ -165,6 +354,53 @@ paths:
               schema:
                 type: array
                 items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+
+  /veterinario/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: "Listar un veterinario"
+      description: "Permite listar un veterinario requerido"
+      operationId: "listar-veterinario"
+      responses:
+        '200':
+          description: "Se lista correctamente el veterinario pedido en la BBDD"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '404':
+          description: "Veterinario no encontrado"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "El veterinario no existe en la DDBB."
+    put:
+      summary: "Actualiza un veterinario"
+      description: "Actualiza los datos de un veterinario"
+=======
                   $ref: "#/components/schemas/Veterinario"
 
   /veterinario/{id}:
@@ -186,6 +422,68 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: "Se actualiza el veterinario"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '404':
+          description: "Veterinario no encontrado"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "El veterinario no existe en la DDBB."
+    delete:
+      summary: "Elimina un veterinario"
+      description: "Elimina un veterinario de la base de datos"
+      responses:
+        '200':
+          description: "Se elimina un veterinario"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+        '404':
+          description: "Veterinario no encontrado"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "El veterinario no existe en la DDBB."
+
+  /mascota:
+    post:
+      summary: "Crea una mascota"
+      description: "Carga la mascota en la base de datos"
+      operationId: "crear-mascota"
+=======
               $ref: "#/components/requestBodies/Nombre"
       responses:
         '200':
@@ -230,6 +528,11 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                name:
+                  type: string
+=======
               allOf:
                 - $ref: "#/components/requestBodies/Especie"
                 - $ref: "#/components/requestBodies/Nombre"
@@ -239,6 +542,45 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '400':
+          description: "Solicitud mal formada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Ingreso no válido"
+        '409':
+          description: "Mascota ya existe"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "La mascota ya existe en la DDBB."
+    get:
+      summary: "Se listan las mascotas"
+      description: "Permite listar las mascotas cargadas en el sistema."
+      responses:
+        '200':
+          description: "Se listan correctamente las mascotas cargadas en la BBDD"
+=======
                 $ref: "#/components/schemas/Mascota"
 
     get:
@@ -253,6 +595,53 @@ paths:
               schema:
                 type: array
                 items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+
+  /mascota/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: "Listar una mascota"
+      description: "Permite listar una mascota requerida"
+      operationId: "listar-mascota"
+      responses:
+        '200':
+          description: "Se lista correctamente la mascota pedida en la BBDD"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '404':
+          description: "Mascota no encontrada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "La mascota no existe en la DDBB."
+    put:
+      summary: "Actualiza una mascota"
+      description: "Actualiza los datos de una mascota"
+=======
                   $ref: "#/components/schemas/Mascota"
 
   /mascota/{id}:
@@ -274,6 +663,68 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: "Se actualiza la mascota"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        '404':
+          description: "Mascota no encontrada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "La mascota no existe en la DDBB."
+    delete:
+      summary: "Elimina una mascota"
+      description: "Elimina una mascota de la base de datos"
+      responses:
+        '200':
+          description: "Se elimina una mascota"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+        '404':
+          description: "Mascota no encontrada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "La mascota no existe en la DDBB."
+
+  /turno:
+    post:
+      summary: "Crea un turno"
+      description: "Carga el turno en la base de datos"
+      operationId: "crear-turno"
+=======
               anyOf:
                 - $ref: "#/components/requestBodies/Especie"
                 - $ref: "#/components/requestBodies/Nombre"
@@ -335,6 +786,57 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: "Turno creado exitosamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  date:
+                    type: string
+                    format: date-time
+        '400':
+          description: "Solicitud mal formada"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Ingreso no válido"
+        '409':
+          description: "Turno ya existe"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "El turno ya existe en la DDBB."
+    get:
+      summary: "Se listan los turnos"
+      description: "Permite listar los turnos cargados en el sistema."
+      responses:
+        '200':
+          description: "Se listan correctamente los turnos cargados en la BBDD"
+=======
               $ref: "#/components/requestBodies/Turno"
       responses:
         '200':
@@ -356,6 +858,155 @@ paths:
               schema:
                 type: array
                 items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    date:
+                      type: string
+                      format: date-time
+
+  /turno/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: "Listar un turno"
+      description: "Permite listar un turno requerido"
+      operationId: "listar-turno"
+      responses:
+        '200':
+          description: "Se lista correctamente el turno pedido en la BBDD"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  date:
+                    type: string
+                    format: date-time
+        '404':
+          description: "Turno no encontrado"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "El turno no existe en la DDBB."
+    put:
+      summary: "Actualiza un turno"
+      description: "Actualiza los datos de un turno"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: "Se actualiza el turno"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  date:
+                    type: string
+                    format: date-time
+        '404':
+          description: "Turno no encontrado"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "El turno no existe en la DDBB."
+    delete:
+      summary: "Elimina un turno"
+      description: "Elimina un turno de la base de datos"
+      responses:
+        '200':
+          description: "Se elimina un turno"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date-time
+        '404':
+          description: "Turno no encontrado"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "El turno no existe en la DDBB."
+/turno/disponible:
+  get:
+    summary: "Listar turnos disponibles"
+    description: "Permite listar todos los turnos disponibles"
+    operationId: "listar-turnos-disponibles"
+    responses:
+      '200':
+        description: "Se listan correctamente los turnos disponibles"
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  fecha:
+                    type: string
+                    format: date
+                  hora:
+                    type: string
+                    format: time
+      '404':
+        description: "No se encontraron turnos disponibles"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 404
+                message:
+                  type: string
+                  example: "No hay turnos disponibles en este momento."
+
+=======
                   $ref: "#/components/schemas/TurnoLista"
 
   /turno/{turno}/{mascota_id}:
