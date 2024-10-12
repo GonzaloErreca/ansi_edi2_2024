@@ -16,7 +16,7 @@ Característica: Modificar una mascota
     """
     {
       "especie_id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
     Y al menos uno de los valores debe estar presente
@@ -27,6 +27,6 @@ Característica: Modificar una mascota
     {
       "id": [NUMBER],
       "especie_id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """

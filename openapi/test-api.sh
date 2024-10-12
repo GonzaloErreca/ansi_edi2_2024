@@ -71,6 +71,10 @@ function msg {
         echo -e "${gr}[✅ SUCCESS] ${message}${nc}"
     elif [[ 'f' == "${flag}" ]]; then
         echo -e "${rd}[❌ FAILURE] ${message}${nc}"
+=======
+        if [[ "true" == "${STOP_ON_FAILURE}" ]]; then
+            exit 1
+        fi
     else
         echo ">>>>>>>>>>>> ${message}"
     fi
@@ -275,20 +279,364 @@ function elementDelete {
 }
 
 # ====================================================================
+# --------------------------------------
+# Test the creation of a species
+#
+# @param string $1 Species name (to create)
+# --------------------------------------
+function testCreateSpecies () {
+    local name="${1}"
+    local flag=''
 
-elementGet '/especie'
-elementCreate '/especie' '{"name":"perro"}'
-elementGet '/especie/1'
-elementUpdate '/especie/1' '{"name":"perro2"}'
-elementDelete '/especie/1'
-elementGet '/veterinario'
-elementCreate '/veterinario' '{"name":"rocky"}'
-elementGet '/veterinario/1'
-elementUpdate '/veterinario/1' '{"name":"rocky"}'
-elementDelete '/veterinario/1'
-elementGet '/mascota'
-elementCreate '/mascota' '{"name":"Puchi"}'
-elementGet '/mascota/1'
-elementUpdate '/mascota/1' '{"name":"Puchi2"}'
-elementDelete '/mascota/1'
-elementGet '/turno'
+    echo '========================================'
+    msg 'Test species creation'
+
+    elementCreate '/especie' '{"nombre":"'$name'"}'
+
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[new] Species name (${name}, ${remote_name})" "${flag}"
+
+    NEW_ID="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
+}
+
+# --------------------------------------
+# Test the list of species
+#
+# @param string $1 Expected amount of species (in the list)
+# @param string $2 Expected species id (used if given)
+# @param string $3 Expected species name (used if given)
+# --------------------------------------
+function testListSpecies () {
+    local amount="${1}"
+    local id="${2}"
+    local name="${3}"
+
+    echo '========================================'
+    msg 'Test species listing'
+
+    elementGet '/especie'
+
+    local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
+    flag=$( (($remote_amount == $amount)) && echo "s" || echo "f" )
+    msg "[list] Amount of species (${amount}, ${remote_amount})" "${flag}"
+
+    if [[ "${id}" ]]; then
+        local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'id' "${id}")
+
+        if [[ "${json}" ]]; then
+            msg "[list] Species found (ID ${id})" "s"
+
+            if [[ "${name}" ]]; then
+                local remote_name=$(getValueFromJson "${json}" 'nombre')
+                flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+                msg "[list] Species name (${name}, ${remote_name})" "${flag}"
+            fi
+        else
+            msg "[list] Species not found (ID ${id})" "f"
+        fi
+    fi
+}
+
+# --------------------------------------
+# Test the edition of a species
+#
+# @param string $1 Species ID (to edit)
+# @param string $2 New species name
+# --------------------------------------
+function testEditSpecies () {
+    local id="${1}"
+    local name="${2}"
+
+    echo '========================================'
+    msg 'Test species edition'
+
+    elementUpdate "/especie/${id}" '{"nombre":"'$name'"}'
+
+    local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+    flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+    msg "[edit] Species id (${id}, ${remote_id})" "${flag}"
+
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[edit] Species name (${name}, ${remote_name})" "${flag}"
+}
+
+# --------------------------------------
+# Test the deletion of a species
+#
+# @param string $1 Species ID (to edit)
+# @param string $2 Species name (used if given)
+# --------------------------------------
+function testDeleteSpecies () {
+    local id="${1}"
+    local name="${2}"
+
+    echo '========================================'
+    msg 'Test species deletion'
+
+    elementDelete "/especie/${id}"
+
+    local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+    flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+    msg "[delete] Species id (${id}, ${remote_id})" "${flag}"
+
+    if [[ "${name}" ]]; then
+        local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+        flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+        msg "[delete] Species name (${name}, ${remote_name})" "${flag}"
+    fi
+}
+
+# ====================================================================
+
+# --------------------------------------
+# Test the creation of a pet
+#
+# @param string $1 Species ID
+# @param string $2 pet name
+# --------------------------------------
+function testCreatePet () {
+    local id="${1}"
+    local pet_name="${2}"
+    local flag=''
+
+    echo '========================================'
+    msg 'Test pets creation'
+
+    elementCreate '/mascota' '{"especie_ID":"'$id'","nombre":"'$pet_name'"}'
+
+    local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+    flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+    msg "[post] Species id (${id}, ${remote_id})" "${flag}"
+
+    NEW_ID_PET="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
+
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${pet_name}" ]] && echo "s" || echo "f")
+    msg "[post] Pet name (${name}, ${remote_name})" "${flag}"
+}
+
+# ====================================================================
+# --------------------------------------
+# Test the listing of pets
+#
+# @param int $1 amount of pets
+# @param string $2 Pet ID 
+# @param string $3 Pet name 
+# --------------------------------------
+function testListPets () {
+	local amount="${1}"
+	local id="${2}"
+	local pet_name="${3}"
+
+	echo '========================================'
+	msg 'Test pets listing'
+
+	elementGet '/mascotas'
+	local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
+	flag=$([[ "${remote_amount}" -eq "${amount}" ]] && echo "s" || echo "f")
+	msg "[list] Amount of pets (${amount}, ${remote_amount})" "${flag}"
+
+	if [[ "${id}" ]]; then
+		local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'id' "${id}")
+	if [[ "${json}" ]]; then
+	msg "[list] Pet found (ID ${id})" "s"
+
+	if [[ "${pet_name}" ]]; then
+	local remote_name=$(getValueFromJson "${json}" 'nombre')
+	flag=$([[ "${remote_name}" == "${pet_name}" ]] && echo "s" || echo "f")
+	msg "[list] Pet name (${pet_name}, ${remote_name})" "${flag}"
+	fi		
+		local species_id=$(getValueFromJson "${json}" 'id_specie')
+
+		if [[ "${species_id}" ]]; then
+		elementGet "/especie/${species_id}"
+		local species_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'name')
+			
+		if [[ "${species_name}" ]]; then
+		msg "[list] Species name: ${species_name}" "s"
+		else
+		msg "[list] Species name not found" "f"
+		fi
+		else
+		msg "[list] Species ID not found for pet (ID ${id})" "f"
+		fi
+		else 
+		msg "[list] Pet not found (ID ${id})" "f"
+	fi
+fi
+														
+}
+
+
+
+# ====================================================================
+
+# --------------------------------------
+# Test the deletion of a pet
+#
+# @param string $1 Pet ID (to edit)
+# @param string $2 Pet name (used if given)
+# --------------------------------------
+function testDeletePet () {
+	local id="${1}"
+	local name="${2}"
+	 echo '========================================'
+	 msg 'Test pet deletion'
+
+	 elementDelete "/mascota/${id}"
+
+	local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+	flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+	msg "[delete] Pet id (${id}, ${remote_id})" "${flag}"
+	
+	if [[ "${name}" ]]; then
+		local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+		flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")	
+		msg "[delete] Pet name (${name}, ${remote_name})" "${flag}"
+	fi
+									}
+# ====================================================================
+
+# --------------------------------------
+# Test the edition of a Pet
+#
+#  @param string $1 Pet ID
+#  @param string $2 New Pet name
+# --------------------------------------
+function testEditPet(){
+	local id="${1}"
+	local name="${2}"
+
+	echo '======================================='
+	msg 'Test pet edition'
+
+	elementUpdate "/mascota/${id}" '{"nombre":"'$name'"}'
+
+	local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+	flag=$([[ "${remote_id}" == "{id}" ]] && echo "s" || echo "f")
+	msg "[info] Pet id (${id}, ${remote_id})" "${flag}"
+
+	local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+	flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+	msg "[edit] Pet name (${name}, ${remote_name})" "${flag}"
+}
+
+#========================================
+# --------------------------------------
+# Test the creation of a vet
+#
+# @param string $1 Vet name (to create)
+# --------------------------------------
+function testCreateVet(){
+	local name="${1}"
+	local flag=''
+
+	echo '========================================'
+	msg 'Test vet creation'
+
+	elementCreate '/veterinario' '{"nombre":"'$name'"}'
+	local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+	flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+	msg "[new] Vet name (${name}, ${remote_name})" "${flag}"
+	NEW_ID_VET="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
+}					
+
+# --------------------------------------
+# Test the list of vets
+#
+# @param string $1 Expected amount of vets (in the list)
+# @param string $2 Expected vet id (used if given)
+# @param string $3 Expected vet name (used if given)
+# --------------------------------------
+function testListVets(){
+    local amount="${1}"
+    local id="${2}"
+    local vet_name="${3}"
+
+    echo '========================================'
+    msg 'Test vets listing'
+    elementGet '/veterinario'
+    local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
+    flag=$([[ "${remote_amount}" -eq "${amount}" ]] && echo "s" || echo "f")
+    msg "[list] Amount of vets (${amount}, ${remote_amount})" "${flag}"
+
+    if [[ "${id}" ]]; then
+        local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'id' "${id}")
+
+        if [[ "${json}" ]]; then
+            msg "[list] Vet found (ID ${id})" "s"
+
+            if [[ "${vet_name}" ]]; then
+                local remote_name=$(getValueFromJson "${json}" 'nombre')
+                flag=$([[ "${remote_name}" == "${vet_name}" ]] && echo "s" || echo "f")
+                msg "[list] Vet name (${vet_name}, ${remote_name})" "${flag}"
+            fi
+        else
+            msg "[list] Vet not found (ID ${id})" "f"
+        fi
+    fi
+}
+# --------------------------------------
+# Test the edition of a vet
+#
+# @param string $1 Vet ID (to edit)
+# @param string $2 New vet name
+# --------------------------------------
+function testEditVet () {
+    local id="${1}"
+    local name="${2}"
+
+    echo '========================================'
+    msg 'Test vet edition'
+
+    elementUpdate "/veterinario/${id}" '{"nombre":"'$name'"}'
+
+    local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+    flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+    msg "[edit] Vet id (${id}, ${remote_id})" "${flag}"
+
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[edit] Vet name (${name}, ${remote_name})" "${flag}"
+}
+# ====================================================================
+
+# Species battery of tests
+# ------------------------
+	
+testListSpecies 0
+
+SPECIES_DOG_NAME='perroxxxx'
+testCreateSpecies "${SPECIES_DOG_NAME}"
+SPECIES_DOG_ID="${NEW_ID}"
+testListSpecies 1 "${SPECIES_DOG_ID}" "${SPECIES_DOG_NAME}"
+SPECIES_DOG_NAME='perro'
+testEditSpecies "${SPECIES_DOG_ID}" "${SPECIES_DOG_NAME}"
+testListSpecies 1 "${SPECIES_DOG_ID}" "${SPECIES_DOG_NAME}"
+
+SPECIES_CAT_NAME='gatoxxxx'
+testCreateSpecies "${SPECIES_CAT_NAME}"
+SPECIES_CAT_ID="${NEW_ID}"
+testListSpecies 2 "${SPECIES_CAT_ID}" "${SPECIES_CAT_NAME}"
+SPECIES_CAT_NAME='gato'
+testEditSpecies "${SPECIES_CAT_ID}" "${SPECIES_CAT_NAME}"
+testListSpecies 2 "${SPECIES_CAT_ID}" "${SPECIES_CAT_NAME}"
+
+SPECIES_TMP_NAME='conejoxxxx'
+testCreateSpecies "${SPECIES_TMP_NAME}"
+SPECIES_TMP_ID="${NEW_ID}"
+testListSpecies 3 "${SPECIES_TMP_ID}" "${SPECIES_TMP_NAME}"
+SPECIES_TMP_NAME='conejo'
+testEditSpecies "${SPECIES_TMP_ID}" "${SPECIES_TMP_NAME}"
+testListSpecies 3 "${SPECIES_TMP_ID}" "${SPECIES_TMP_NAME}"
+
+testDeleteSpecies "${SPECIES_TMP_ID}" "${SPECIES_TMP_NAME}"
+testListSpecies 2 "${SPECIES_DOG_ID}" "${SPECIES_DOG_NAME}"
+testListSpecies 2 "${SPECIES_CAT_ID}" "${SPECIES_CAT_NAME}"
+
+PET_NAME='bobby'
+testCreatePet "${NEW_ID}" "${PET_NAME}"
+NEW_ID_PET 1
+

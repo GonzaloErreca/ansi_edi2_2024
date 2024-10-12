@@ -15,7 +15,7 @@ Característica: Modificar una especie
     Y se envía un objeto JSON que respeta el formato:
     """
     {
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
     Entonces el sistema retorna el código 200
@@ -24,7 +24,7 @@ Característica: Modificar una especie
     """
     {
       "id": [NUMBER],
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
 
@@ -39,7 +39,7 @@ Característica: Modificar una especie
     Y se envía un objeto JSON que respeta el formato:
     """
     {
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
     Entonces el sistema retorna el código 403
@@ -50,7 +50,7 @@ Característica: Modificar una especie
     Y el objeto es un JSON que respeta el formato:
     """
     {
-      "message": [STRING]
+      "mensaje": [STRING]
     }
     """
 
@@ -67,7 +67,7 @@ Característica: Modificar una especie
     Y se envía un objeto JSON que respeta el formato:
     """
     {
-      "name": [STRING]
+      "nombre": [STRING]
     }
     """
     Entonces el sistema retorna el código 422
@@ -78,7 +78,7 @@ Característica: Modificar una especie
     Y el objeto es un JSON que respeta el formato:
     """
     {
-      "message": [STRING]
+      "mensaje": [STRING]
     }
     """
 
@@ -93,6 +93,6 @@ Característica: Modificar una especie
     Y el objeto es un JSON que respeta el formato:
     """
     {
-      "message": [STRING]
+      "mensaje": [STRING]
     }
     """

@@ -18,7 +18,7 @@ Característica: Listar las especies
     [
       {
         "id": [NUMBER],
-        "name": [STRING]
+        "nombre": [STRING]
       }
     ]
     """

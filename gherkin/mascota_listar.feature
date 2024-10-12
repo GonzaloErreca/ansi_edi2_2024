@@ -19,7 +19,7 @@ Característica: Listar las mascotas
       {
         "id": [NUMBER],
         "especie_id": [NUMBER],
-        "name": [STRING]
+        "nombre": [STRING]
       }
     ]
     """

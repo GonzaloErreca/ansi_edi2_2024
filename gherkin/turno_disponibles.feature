@@ -18,4 +18,4 @@ Característica: Listar turnos disponibles
       [STRING]
     ]
     """
-    Y cada turno respeta el estándar ISO 8601 con el formato "YYYY-MM-DDThh:mm:ss±hh:mm"
+    Y cada turno respeta el estándar ISO 8601 con el formato "YYYYMMDDThhmmssZ"
