@@ -1,0 +1,49 @@
+digraph dfd_vet_level_2_0 {
+    node [
+        shape=record
+    ]
+
+    subgraph external_entities {
+        admin [
+            label="Administrador"
+            shape=box
+        ];
+    }
+
+    subgraph cluster_system {
+        label="Diagrama 2.0";
+        labelloc="b";
+
+        process21 [
+            label="{<f0>2.1|<f1>Crear Veterinario}"
+            shape=Mrecord
+        ];
+        process22 [
+            label="{<f0>2.2|<f1>Listar Veterinarios}"
+            shape=Mrecord
+        ];
+        process23 [
+            label="{<f0>2.3|<f1>Editar Veterinario}"
+            shape=Mrecord
+        ];
+        process24 [
+            label="{<f0>2.4|<f1>Eliminar Veterinario}"
+            shape=Mrecord
+        ];
+
+        store20 [
+            label="<f0> |<f1> Veterinario"
+        ];
+    }
+
+    ## Veterinarios:
+    admin -> process21 [label="(5) Crear veterinario"]
+    process22 -> admin [label="(6) Listar veterinarios"]
+    admin -> process23 [label="(7) Editar veterinario"]
+    admin -> process24 [label="(8) Eliminar veterinario"]
+
+    process21 -> store20 [label="(21) Guardar veterinario"]
+    store20 -> process22 [label="(22) Obtener veterinarios"]
+    process23 -> store20 [label="(23) Actualizar veterinario"]
+    process24 -> store20 [label="(24) Eliminar veterinario"]
+}

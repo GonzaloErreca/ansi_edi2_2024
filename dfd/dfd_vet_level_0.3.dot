@@ -1,0 +1,48 @@
+digraph dfd_vet_level_0_3 {
+    node [
+        shape=record
+    ]
+
+    subgraph external_entities {
+        admin [
+            label="Administrador"
+            shape=box
+        ];
+        user [
+            label="Usuario"
+            shape=box
+        ];
+    }
+
+    subgraph cluster_system {
+        label="Diagrama 0.3";
+        labelloc="b";
+
+        process30 [
+            label="{<f0>3.0|<f1>CRUD Mascota}"
+            shape=Mrecord
+        ];
+
+        store10 [
+            label="<f0> |<f1> Especie"
+        ];
+        store30 [
+            label="<f0> |<f1> Mascota"
+        ];
+
+        {rank=same; l1[style=invis, shape=point]; process30;}
+        {rank=same; l2[style=invis, shape=point]; store10; store30;}
+    }
+
+    ## Mascotas:
+    user -> process30 [label="(9) Crear mascota"]
+    process30 -> admin [label="(10) Listar mascotas"]
+    user -> process30 [label="(11) Editar mascota"]
+    user -> process30 [label="(12) Eliminar mascota"]
+
+    store10 -> process30 [label="(18) Obtener especies"]
+    process30 -> store30 [label="(25) Guardar mascota"]
+    store30 -> process30 [label="(26) Obtener mascotas"]
+    process30 -> store30 [label="(27) Actualizar mascota"]
+    process30 -> store30 [label="(28) Eliminar mascota"]
+}

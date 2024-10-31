@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# @see https://stackoverflow.com/a/4774063
+SCRIPTPATH="$( cd -- "$(dirname "$0")" > /dev/null 2>&1; pwd -P )"
+
+# Move to script's upper directory
+cd "${SCRIPTPATH}/.."
+
 # --------------------------------------
 # Check `curl` availability
 # --------------------------------------
@@ -71,7 +77,6 @@ function msg {
         echo -e "${gr}[✅ SUCCESS] ${message}${nc}"
     elif [[ 'f' == "${flag}" ]]; then
         echo -e "${rd}[❌ FAILURE] ${message}${nc}"
-=======
         if [[ "true" == "${STOP_ON_FAILURE}" ]]; then
             exit 1
         fi
@@ -279,6 +284,7 @@ function elementDelete {
 }
 
 # ====================================================================
+
 # --------------------------------------
 # Test the creation of a species
 #
@@ -391,221 +397,407 @@ function testDeleteSpecies () {
 # ====================================================================
 
 # --------------------------------------
-# Test the creation of a pet
+# Test the creation of a Pet
 #
-# @param string $1 Species ID
-# @param string $2 pet name
+# @param string $1 Pet name (to create)
+# @param int $2 Species ID (to asign)
 # --------------------------------------
 function testCreatePet () {
-    local id="${1}"
-    local pet_name="${2}"
+    local name="${1}"
+    local species_id="${2}"
     local flag=''
 
     echo '========================================'
-    msg 'Test pets creation'
+    msg 'Test pet creation'
 
-    elementCreate '/mascota' '{"especie_ID":"'$id'","nombre":"'$pet_name'"}'
+    elementCreate '/mascota' '{"nombre":"'$name'","especie_id":"'$species_id'"}'
+
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[new] Pet name (${name}, ${remote_name})" "${flag}"
+
+    local remote_pet_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'especie_id')
+    flag=$([[ "${remote_pet_id}" == "${species_id}" ]] && echo "s" || echo "f")
+    msg "[new] Species ID (${remote_pet_id}, ${species_id})" "${flag}"
+
+    NEW_ID="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
+}
+
+# --------------------------------------
+# Test the list of pets
+#
+# @param string $1 Expected amount of pets (in the list)
+# @param string $2 Expected pets id (used if given)
+# @param string $3 Expected pets name (used if given)
+# @param string $4 Expected species id (used if given)
+# --------------------------------------
+function testListPets () {
+    local amount="${1}"
+    local id="${2}"
+    local name="${3}"
+    local species_id="${4}"
+    local flag=''
+
+    echo '========================================'
+    msg 'Test pets listing'
+
+    elementGet '/mascota'
+
+    local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
+    flag=$( (($remote_amount == $amount)) && echo "s" || echo "f" )
+    msg "[list] Amount of pets (${amount}, ${remote_amount})" "${flag}"
+
+    if [[ "${id}" ]]; then
+        local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'id' "${id}")
+
+        if [[ "${json}" ]]; then
+            msg "[list] Pet found (ID ${id})" "s"
+
+            if [[ "${name}" ]]; then
+                local remote_name=$(getValueFromJson "${json}" 'nombre')
+                flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+                msg "[list] Pet name (${name}, ${remote_name})" "${flag}"
+            fi
+
+            if [[ "${species_id}" ]]; then
+                local remote_species=$(getValueFromJson "${json}" 'especie_id')
+                flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+                msg "[list] Species ID (${species_id}, ${remote_species})" "${flag}"
+            fi
+        else
+            msg "[list] Pet not found (ID ${id})" "f"
+        fi
+    fi
+}
+
+# --------------------------------------
+# Test the edition of a pet
+#
+# @param string $1 Pet ID
+# @param string $2 Pet name (to edit)
+# @param string $3 Species ID (to edit)
+# --------------------------------------
+function testEditPet () {
+    local id="${1}"
+    local name="${2}"
+    local species_id="${3}"
+    local flag=''
+
+    echo '========================================'
+    msg 'Test pet edition'
+
+    elementUpdate "/mascota/${id}" '{"especie_id":"'$species_id'","nombre":"'$name'"}'
 
     local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
     flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
-    msg "[post] Species id (${id}, ${remote_id})" "${flag}"
-
-    NEW_ID_PET="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
+    msg "[edit] Pet ID (${id}, ${remote_id})" "${flag}"
 
     local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
-    flag=$([[ "${remote_name}" == "${pet_name}" ]] && echo "s" || echo "f")
-    msg "[post] Pet name (${name}, ${remote_name})" "${flag}"
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[edit] Pet name (${name}, ${remote_name})" "${flag}"
+
+    local remote_species_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'especie_id')
+    flag=$([[ "${remote_species_id}" == "${species_id}" ]] && echo "s" || echo "f")
+    msg "[edit] Species ID (${species_id}, ${remote_species_id})" "${flag}"
 }
-
-# ====================================================================
-# --------------------------------------
-# Test the listing of pets
-#
-# @param int $1 amount of pets
-# @param string $2 Pet ID 
-# @param string $3 Pet name 
-# --------------------------------------
-function testListPets () {
-	local amount="${1}"
-	local id="${2}"
-	local pet_name="${3}"
-
-	echo '========================================'
-	msg 'Test pets listing'
-
-	elementGet '/mascotas'
-	local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
-	flag=$([[ "${remote_amount}" -eq "${amount}" ]] && echo "s" || echo "f")
-	msg "[list] Amount of pets (${amount}, ${remote_amount})" "${flag}"
-
-	if [[ "${id}" ]]; then
-		local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'id' "${id}")
-	if [[ "${json}" ]]; then
-	msg "[list] Pet found (ID ${id})" "s"
-
-	if [[ "${pet_name}" ]]; then
-	local remote_name=$(getValueFromJson "${json}" 'nombre')
-	flag=$([[ "${remote_name}" == "${pet_name}" ]] && echo "s" || echo "f")
-	msg "[list] Pet name (${pet_name}, ${remote_name})" "${flag}"
-	fi		
-		local species_id=$(getValueFromJson "${json}" 'id_specie')
-
-		if [[ "${species_id}" ]]; then
-		elementGet "/especie/${species_id}"
-		local species_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'name')
-			
-		if [[ "${species_name}" ]]; then
-		msg "[list] Species name: ${species_name}" "s"
-		else
-		msg "[list] Species name not found" "f"
-		fi
-		else
-		msg "[list] Species ID not found for pet (ID ${id})" "f"
-		fi
-		else 
-		msg "[list] Pet not found (ID ${id})" "f"
-	fi
-fi
-														
-}
-
-
-
-# ====================================================================
 
 # --------------------------------------
 # Test the deletion of a pet
 #
-# @param string $1 Pet ID (to edit)
-# @param string $2 Pet name (used if given)
+# @param string $1 Pet ID (to delete)
+# @param string $2 Pet name (to delete)
+# @param string $3 Species ID (to delete)
 # --------------------------------------
 function testDeletePet () {
-	local id="${1}"
-	local name="${2}"
-	 echo '========================================'
-	 msg 'Test pet deletion'
+    local id="${1}"
+    local name="${2}"
+    local species_id="${3}"
+    local flag=''
 
-	 elementDelete "/mascota/${id}"
+    echo '========================================'
+    msg 'Test pet deletion'
 
-	local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
-	flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
-	msg "[delete] Pet id (${id}, ${remote_id})" "${flag}"
-	
-	if [[ "${name}" ]]; then
-		local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
-		flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")	
-		msg "[delete] Pet name (${name}, ${remote_name})" "${flag}"
-	fi
-									}
+    elementDelete "/mascota/${id}"
+
+    local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+    flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+    msg "[delete] Pet ID (${id}, ${remote_id})" "${flag}"
+
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[delete] Pet name (${name}, ${remote_name})" "${flag}"
+
+    local remote_species_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'especie_id')
+    flag=$([[ "${remote_species_id}" == "${species_id}" ]] && echo "s" || echo "f")
+    msg "[delete] Species ID (${species_id}, ${remote_species_id})" "${flag}"
+}
+
 # ====================================================================
 
 # --------------------------------------
-# Test the edition of a Pet
+# Test the creation of a vets
 #
-#  @param string $1 Pet ID
-#  @param string $2 New Pet name
+# @param string $1 Vets name (to create)
 # --------------------------------------
-function testEditPet(){
-	local id="${1}"
-	local name="${2}"
+function testCreateVets () {
+    local name="${1}"
+    local flag=''
 
-	echo '======================================='
-	msg 'Test pet edition'
+    echo '========================================'
+    msg 'Test vets creation'
 
-	elementUpdate "/mascota/${id}" '{"nombre":"'$name'"}'
+    elementCreate '/veterinario' '{"nombre":"'$name'"}'
 
-	local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
-	flag=$([[ "${remote_id}" == "{id}" ]] && echo "s" || echo "f")
-	msg "[info] Pet id (${id}, ${remote_id})" "${flag}"
+    local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+    flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+    msg "[new] Vets name (${name}, ${remote_name})" "${flag}"
 
-	local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
-	flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
-	msg "[edit] Pet name (${name}, ${remote_name})" "${flag}"
+    NEW_ID="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
 }
-
-#========================================
-# --------------------------------------
-# Test the creation of a vet
-#
-# @param string $1 Vet name (to create)
-# --------------------------------------
-function testCreateVet(){
-	local name="${1}"
-	local flag=''
-
-	echo '========================================'
-	msg 'Test vet creation'
-
-	elementCreate '/veterinario' '{"nombre":"'$name'"}'
-	local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
-	flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
-	msg "[new] Vet name (${name}, ${remote_name})" "${flag}"
-	NEW_ID_VET="$(getValueFromJson "${CURL_RESPONSE_DATA}" "id")"
-}					
 
 # --------------------------------------
 # Test the list of vets
 #
 # @param string $1 Expected amount of vets (in the list)
-# @param string $2 Expected vet id (used if given)
-# @param string $3 Expected vet name (used if given)
+# @param string $2 Expected vets id (used if given)
+# @param string $3 Expected vets name (used if given)
 # --------------------------------------
-function testListVets(){
+function testListVets () {
     local amount="${1}"
     local id="${2}"
-    local vet_name="${3}"
+    local name="${3}"
 
     echo '========================================'
     msg 'Test vets listing'
+
     elementGet '/veterinario'
+
     local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
-    flag=$([[ "${remote_amount}" -eq "${amount}" ]] && echo "s" || echo "f")
+    flag=$( (($remote_amount == $amount)) && echo "s" || echo "f" )
     msg "[list] Amount of vets (${amount}, ${remote_amount})" "${flag}"
 
     if [[ "${id}" ]]; then
         local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'id' "${id}")
 
         if [[ "${json}" ]]; then
-            msg "[list] Vet found (ID ${id})" "s"
+            msg "[list] Vets found (ID ${id})" "s"
 
-            if [[ "${vet_name}" ]]; then
+            if [[ "${name}" ]]; then
                 local remote_name=$(getValueFromJson "${json}" 'nombre')
-                flag=$([[ "${remote_name}" == "${vet_name}" ]] && echo "s" || echo "f")
-                msg "[list] Vet name (${vet_name}, ${remote_name})" "${flag}"
+                flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+                msg "[list] Vets name (${name}, ${remote_name})" "${flag}"
             fi
         else
-            msg "[list] Vet not found (ID ${id})" "f"
+            msg "[list] Vets not found (ID ${id})" "f"
         fi
     fi
 }
+
 # --------------------------------------
-# Test the edition of a vet
+# Test the edition of a vets
 #
-# @param string $1 Vet ID (to edit)
-# @param string $2 New vet name
+# @param string $1 Vets ID (to edit)
+# @param string $2 New vets name
 # --------------------------------------
-function testEditVet () {
+function testEditVets () {
     local id="${1}"
     local name="${2}"
 
     echo '========================================'
-    msg 'Test vet edition'
+    msg 'Test vets edition'
 
     elementUpdate "/veterinario/${id}" '{"nombre":"'$name'"}'
 
     local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
     flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
-    msg "[edit] Vet id (${id}, ${remote_id})" "${flag}"
+    msg "[edit] Vets id (${id}, ${remote_id})" "${flag}"
 
     local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
     flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
-    msg "[edit] Vet name (${name}, ${remote_name})" "${flag}"
+    msg "[edit] Vets name (${name}, ${remote_name})" "${flag}"
 }
+
+# --------------------------------------
+# Test the deletion of a vets
+#
+# @param string $1 Vets ID (to edit)
+# @param string $2 Vets name (used if given)
+# --------------------------------------
+function testDeleteVets () {
+    local id="${1}"
+    local name="${2}"
+
+    echo '========================================'
+    msg 'Test vets deletion'
+
+    elementDelete "/veterinario/${id}"
+
+    local remote_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'id')
+    flag=$([[ "${remote_id}" == "${id}" ]] && echo "s" || echo "f")
+    msg "[delete] Vets id (${id}, ${remote_id})" "${flag}"
+
+    if [[ "${name}" ]]; then
+        local remote_name=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'nombre')
+        flag=$([[ "${remote_name}" == "${name}" ]] && echo "s" || echo "f")
+        msg "[delete] Vets name (${name}, ${remote_name})" "${flag}"
+    fi
+}
+
+# ====================================================================
+
+# --------------------------------------
+# Test the list of available appointments
+#
+# @param string $1 Expected amount of appointments (in the list)
+# @param string $2 Index to get an appointment from (used if given)
+# @param string $3 Expected appointment from the given index (used if given)
+# --------------------------------------
+function testAvailableAppointments () {
+    local amount="${1}"
+    local index="${2}"
+    local to_check="${3}"
+    local flag=''
+
+    APPOINTMENT_FOUND=''
+
+    echo '========================================'
+    msg 'Test appointments listing'
+
+    elementGet '/disponibles'
+
+    local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
+    flag=$( (($remote_amount == $amount)) && echo "s" || echo "f" )
+    msg "[list] Amount of appointments (${amount}, ${remote_amount})" "${flag}"
+
+    if [[ "${index}" ]]; then
+        local item_found=$(getValueFromJson "${CURL_RESPONSE_DATA}" "${index}")
+
+        if [[ "${item_found}" ]]; then
+            APPOINTMENT_FOUND="${item_found}"
+
+            msg "[list] Appointment found (${index}, ${item_found})" "s"
+
+            if [[ "${to_check}" ]]; then
+                flag=$([[ "${item_found}" == "${to_check}" ]] && echo "s" || echo "f")
+                msg "[list] Appointment match (${to_check}, ${item_found})" "${flag}"
+            fi
+        else
+            msg "[list] Appointment not found (${index})" "f"
+        fi
+    fi
+}
+
+# --------------------------------------
+# Test the action of taking an appointment
+#
+# @param string $1 Hour of the appointment (to take)
+# @param string $2 ID of the pet that will attend
+# --------------------------------------
+function testTakeAppointment () {
+    local appointment="${1}"
+    local pet_id="${2}"
+    local flag=''
+
+    echo '========================================'
+    msg 'Test to take appointment'
+
+    elementCreate '/turno' '{"turno":"'$appointment'","mascota_id":"'$pet_id'"}'
+
+    local remote_appointment=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'turno')
+    flag=$([[ "${remote_appointment}" == "${appointment}" ]] && echo "s" || echo "f")
+    msg "[new] Appointment date and hour (${appointment}, ${remote_appointment})" "${flag}"
+
+    local remote_pet_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'mascota_id')
+    flag=$([[ "${remote_pet_id}" == "${pet_id}" ]] && echo "s" || echo "f")
+    msg "[new] Pet ID (${pet_id}, ${remote_pet_id})" "${flag}"
+}
+
+# --------------------------------------
+# Test the list of taken appointments
+#
+# @param string $1 Expected amount of taken appointments (in the list)
+# @param string $2 Hour of the appointment (used if given)
+# @param string $3 ID of the pet to check (used if given)
+# @param string $4 ID of the veterinary (used if given)
+# --------------------------------------
+function testListAppointment () {
+    local amount="${1}"
+    local appointment="${2}"
+    local pet_id="${3}"
+    local vet_id="${4}"
+    local flag=''
+
+    echo '========================================'
+    msg 'Test the list of taken appointments'
+
+    elementGet '/turno'
+
+    local remote_amount=$(countItemsInJsonList "${CURL_RESPONSE_DATA}")
+    flag=$( (($remote_amount == $amount)) && echo "s" || echo "f" )
+    msg "[list] Amount of taken appointments (${amount}, ${remote_amount})" "${flag}"
+
+    if [[ "${appointment}" ]]; then
+        local json=$(searchByKeyValue "${CURL_RESPONSE_DATA}" 'turno' "${appointment}")
+
+        if [[ "${json}" ]]; then
+            msg "[list] Appointment found ('${appointment}')" "s"
+
+            if [[ "${pet_id}" ]]; then
+                local remote_pet_id=$(getValueFromJson "${json}" 'mascota_id')
+                flag=$([[ "${remote_pet_id}" == "${pet_id}" ]] && echo "s" || echo "f")
+                msg "[list] Appointment pet ID (${pet_id}, ${remote_pet_id})" "${flag}"
+            fi
+
+            if [[ "${vet_id}" ]]; then
+                local remote_vet_id=$(getValueFromJson "${json}" 'veterinario_id')
+                flag=$([[ "${remote_vet_id}" == "${vet_id}" ]] && echo "s" || echo "f")
+                msg "[list] Appointment veterinary ID (${vet_id}, ${remote_vet_id})" "${flag}"
+            fi
+        else
+            msg "[list] Appointment not found ('${appointment}')" "f"
+        fi
+    fi
+}
+
+# --------------------------------------
+# Test the deletion of an appointments
+#
+# @param string $1 Hour of the appointment
+# @param string $2 ID of the pet to check
+# @param string $3 ID of the veterinary
+# --------------------------------------
+function testDeleteAppointment () {
+    local appointment="${1}"
+    local pet_id="${2}"
+    local flag=''
+
+    echo '========================================'
+    msg 'Test appointment deletion'
+
+    elementDelete "/turno/${appointment}/${pet_id}"
+
+    local remote_appointment=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'turno')
+    flag=$([[ "${remote_appointment}" == "${appointment}" ]] && echo "s" || echo "f")
+    msg "[delete] Appointment date and hour (${appointment}, ${remote_appointment})" "${flag}"
+
+    local remote_pet_id=$(getValueFromJson "${CURL_RESPONSE_DATA}" 'mascota_id')
+    flag=$([[ "${remote_pet_id}" == "${pet_id}" ]] && echo "s" || echo "f")
+    msg "[delete] Pet ID (${pet_id}, ${remote_pet_id})" "${flag}"
+}
+
+# ====================================================================
+
+# Remove and create DDBB
+# ----------------------
+
+rm -f database.sqlite
+sqlite3 database.sqlite < esquema-ddbb.sql
+
 # ====================================================================
 
 # Species battery of tests
 # ------------------------
-	
+
 testListSpecies 0
 
 SPECIES_DOG_NAME='perroxxxx'
@@ -636,7 +828,130 @@ testDeleteSpecies "${SPECIES_TMP_ID}" "${SPECIES_TMP_NAME}"
 testListSpecies 2 "${SPECIES_DOG_ID}" "${SPECIES_DOG_NAME}"
 testListSpecies 2 "${SPECIES_CAT_ID}" "${SPECIES_CAT_NAME}"
 
-PET_NAME='bobby'
-testCreatePet "${NEW_ID}" "${PET_NAME}"
-NEW_ID_PET 1
+# ====================================================================
 
+# Pets battery of tests
+# ---------------------
+
+testListPets 0
+
+PET_01_NAME="Firulaixxx"
+PET_01_SPECIES="${SPECIES_CAT_ID}"
+testCreatePet "${PET_01_NAME}" "${PET_01_SPECIES}"
+PET_01_ID="${NEW_ID}"
+testListPets 1 "${PET_01_ID}" "${PET_01_NAME}" "${PET_01_SPECIES}"
+PET_01_NAME="Firulai"
+PET_01_SPECIES="${SPECIES_DOG_ID}"
+testEditPet "${PET_01_ID}" "${PET_01_NAME}" "${PET_01_SPECIES}"
+testListPets 1 "${PET_01_ID}" "${PET_01_NAME}" "${PET_01_SPECIES}"
+
+PET_02_NAME="Bartoloxxx"
+PET_02_SPECIES="${SPECIES_DOG_ID}"
+testCreatePet "${PET_02_NAME}" "${PET_02_SPECIES}"
+PET_02_ID="${NEW_ID}"
+testListPets 2 "${PET_02_ID}" "${PET_02_NAME}" "${PET_02_SPECIES}"
+PET_02_NAME="Bartolo"
+PET_02_SPECIES="${SPECIES_CAT_ID}"
+testEditPet "${PET_02_ID}" "${PET_02_NAME}" "${PET_02_SPECIES}"
+testListPets 2 "${PET_02_ID}" "${PET_02_NAME}" "${PET_02_SPECIES}"
+
+PET_TMP_NAME="Puchoxxx"
+PET_TMP_SPECIES="${SPECIES_CAT_ID}"
+testCreatePet "${PET_TMP_NAME}" "${PET_TMP_SPECIES}"
+PET_TMP_ID="${NEW_ID}"
+testListPets 3 "${PET_TMP_ID}" "${PET_TMP_NAME}" "${PET_TMP_SPECIES}"
+PET_TMP_NAME="Pucho"
+PET_TMP_SPECIES="${SPECIES_DOG_ID}"
+testEditPet "${PET_TMP_ID}" "${PET_TMP_NAME}" "${PET_TMP_SPECIES}"
+testListPets 3 "${PET_TMP_ID}" "${PET_TMP_NAME}" "${PET_TMP_SPECIES}"
+
+testDeletePet "${PET_TMP_ID}" "${PET_TMP_NAME}" "${PET_TMP_SPECIES}"
+testListPets 2 "${PET_01_ID}" "${PET_01_NAME}" "${PET_01_SPECIES}"
+testListPets 2 "${PET_02_ID}" "${PET_02_NAME}" "${PET_02_SPECIES}"
+
+# ====================================================================
+
+# Vets battery of tests
+# ---------------------
+
+testListVets 0
+
+VETS_01_NAME='Pepito'
+testCreateVets "${VETS_01_NAME}"
+VETS_01_ID="${NEW_ID}"
+testListVets 1 "${VETS_01_ID}" "${VETS_01_NAME}"
+VETS_01_NAME='Pepo'
+testEditVets "${VETS_01_ID}" "${VETS_01_NAME}"
+testListVets 1 "${VETS_01_ID}" "${VETS_01_NAME}"
+
+VETS_02_NAME='Pepita'
+testCreateVets "${VETS_02_NAME}"
+VETS_02_ID="${NEW_ID}"
+testListVets 2 "${VETS_02_ID}" "${VETS_02_NAME}"
+VETS_02_NAME='Pepon'
+testEditVets "${VETS_02_ID}" "${VETS_02_NAME}"
+testListVets 2 "${VETS_02_ID}" "${VETS_02_NAME}"
+
+VETS_TEMP_NAME='Pepin'
+testCreateVets "${VETS_TEMP_NAME}"
+VETS_TEMP_ID="${NEW_ID}"
+testListVets 3 "${VETS_TEMP_ID}" "${VETS_TEMP_NAME}"
+VETS_TEMP_NAME='Pepecito'
+testEditVets "${VETS_TEMP_ID}" "${VETS_TEMP_NAME}"
+testListVets 3 "${VETS_TEMP_ID}" "${VETS_TEMP_NAME}"
+
+testDeleteVets "${VETS_TEMP_ID}" "${VETS_TEMP_NAME}"
+testListVets 2 "${VETS_01_ID}" "${VETS_01_NAME}"
+testListVets 2 "${VETS_02_ID}" "${VETS_02_NAME}"
+
+# ====================================================================
+
+# Appointments battery of tests
+# -----------------------------
+
+APPOINTMENTS_PER_DAY=8
+DAYS_WITH_APPOINTMENTS=2
+AMOUNT_OF_APPOINTMENTS=$(( $APPOINTMENTS_PER_DAY * $DAYS_WITH_APPOINTMENTS ))
+
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 0
+FIRST_HOUR_APPOINTMENT="${APPOINTMENT_FOUND}"
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 1
+SECOND_HOUR_APPOINTMENT="${APPOINTMENT_FOUND}"
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 2
+THIRD_HOUR_APPOINTMENT="${APPOINTMENT_FOUND}"
+
+testListAppointment 0
+
+testTakeAppointment $FIRST_HOUR_APPOINTMENT $PET_01_ID
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 0 $FIRST_HOUR_APPOINTMENT
+testListAppointment 1 $FIRST_HOUR_APPOINTMENT $PET_01_ID $VETS_01_ID
+
+testTakeAppointment $SECOND_HOUR_APPOINTMENT $PET_02_ID
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 1 $SECOND_HOUR_APPOINTMENT
+testListAppointment 2 $SECOND_HOUR_APPOINTMENT $PET_02_ID $VETS_01_ID
+
+testTakeAppointment $SECOND_HOUR_APPOINTMENT $PET_01_ID
+AMOUNT_OF_APPOINTMENTS=$(( $AMOUNT_OF_APPOINTMENTS - 1 ))
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 0 $FIRST_HOUR_APPOINTMENT
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 1 $THIRD_HOUR_APPOINTMENT
+testListAppointment 3
+
+testTakeAppointment $FIRST_HOUR_APPOINTMENT $PET_02_ID
+AMOUNT_OF_APPOINTMENTS=$(( $AMOUNT_OF_APPOINTMENTS - 1 ))
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 0 $THIRD_HOUR_APPOINTMENT
+testListAppointment 4
+
+testDeleteAppointment $FIRST_HOUR_APPOINTMENT $PET_02_ID
+AMOUNT_OF_APPOINTMENTS=$(( $AMOUNT_OF_APPOINTMENTS + 1 ))
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 0 $FIRST_HOUR_APPOINTMENT
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 1 $THIRD_HOUR_APPOINTMENT
+testListAppointment 3
+
+testDeleteAppointment $SECOND_HOUR_APPOINTMENT $PET_01_ID
+AMOUNT_OF_APPOINTMENTS=$(( $AMOUNT_OF_APPOINTMENTS + 1 ))
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 0 $FIRST_HOUR_APPOINTMENT
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 1 $SECOND_HOUR_APPOINTMENT
+testAvailableAppointments $AMOUNT_OF_APPOINTMENTS 2 $THIRD_HOUR_APPOINTMENT
+testListAppointment 2
+
+# ====================================================================

@@ -1,0 +1,101 @@
+digraph dfd_vet_level_0_0 {
+    node [
+        shape=record
+    ]
+
+    subgraph external_entities {
+        admin [
+            label="Administrador"
+            shape=box
+        ];
+        user [
+            label="Usuario"
+            shape=box
+        ];
+    }
+
+    subgraph cluster_system {
+        label="Diagrama 0";
+        labelloc="b";
+
+        process10 [
+            label="{<f0>1.0|<f1>CRUD Especie}"
+            shape=Mrecord
+        ];
+        process20 [
+            label="{<f0>2.0|<f1>CRUD Veterinario}"
+            shape=Mrecord
+        ];
+        process30 [
+            label="{<f0>3.0|<f1>CRUD Mascota}"
+            shape=Mrecord
+        ];
+        process40 [
+            label="{<f0>4.0|<f1>CRUD Turno}"
+            shape=Mrecord
+        ];
+
+        store10 [
+            label="<f0> |<f1> Especie"
+        ];
+        store20 [
+            label="<f0> |<f1> Veterinario"
+        ];
+        store30 [
+            label="<f0> |<f1> Mascota"
+        ];
+        store40 [
+            label="<f0> |<f1> Turno"
+        ];
+
+        {rank=same; l1[style=invis, shape=point]; process10; process20;}
+        {rank=same; l2[style=invis, shape=point]; store10; store20; store30; store40;}
+        {rank=same; l3[style=invis, shape=point]; process30; process40;}
+    }
+
+    ## Especies:
+    admin -> process10 [label="(1) Crear especie"]
+    process10 -> user [label="(2) Listar especies"]
+    admin -> process10 [label="(3) Editar especie"]
+    admin -> process10 [label="(4) Eliminar especie"]
+
+    process10 -> store10 [label="(17) Guardar especie"]
+    store10 -> process10 [label="(18) Obtener especies"]
+    process10 -> store10 [label="(19) Actualizar especie"]
+    process10 -> store10 [label="(20) Eliminar especie"]
+
+    ## Veterinarios:
+    admin -> process20 [label="(5) Crear veterinario"]
+    process20 -> admin [label="(6) Listar veterinarios"]
+    admin -> process20 [label="(7) Editar veterinario"]
+    admin -> process20 [label="(8) Eliminar veterinario"]
+
+    process20 -> store20 [label="(21) Guardar veterinario"]
+    store20 -> process20 [label="(22) Obtener veterinarios"]
+    process20 -> store20 [label="(23) Actualizar veterinario"]
+    process20 -> store20 [label="(24) Eliminar veterinario"]
+
+    ## Mascotas:
+    user -> process30 [label="(9) Crear mascota"]
+    process30 -> admin [label="(10) Listar mascotas"]
+    user -> process30 [label="(11) Editar mascota"]
+    user -> process30 [label="(12) Eliminar mascota"]
+
+    store10 -> process30 [label="(18) Obtener especies"]
+    process30 -> store30 [label="(25) Guardar mascota"]
+    store30 -> process30 [label="(26) Obtener mascotas"]
+    process30 -> store30 [label="(27) Actualizar mascota"]
+    process30 -> store30 [label="(28) Eliminar mascota"]
+
+    ## Turnos:
+    process40 -> user [label="(13) Turnos disponibles"]
+    user -> process40 [label="(14) Tomar turno"]
+    process40 -> admin [label="(15) Listar turnos"]
+    admin -> process40 [label="(16) Cancelar turno"]
+
+    store20 -> process40 [label="(22) Obtener veterinarios"]
+    store30 -> process40 [label="(26) Obtener mascotas"]
+    process40 -> store40 [label="(29) Guardar turno"]
+    store40 -> process40 [label="(30) Obtener turnos"]
+    process40 -> store40 [label="(31) Eliminar turno"]
+}

@@ -1,17 +1,16 @@
 <?php
 
-function handle_request($id, $input) {
+function handle_request($id, $input)
+{
     $input = json_decode($input, true);
 
     $db = new SQLite3('database.sqlite');
-    $db->exec("INSERT INTO especies (nombre) VALUES ('{$input['name']}')");
+    $db->exec("INSERT INTO especie (nombre) VALUES ('{$input['nombre']}')");
     $id = $db->lastInsertRowID();
-    $especie = $db->querySingle("SELECT id, nombre FROM especies WHERE id = {$id}", true);
     $db->close();
 
     echo json_encode([
-        'id' => $especie['id'],
-        'name' => $especie['nombre'],
+        'id' => $id,
+        'nombre' => $input['nombre'],
     ]);
 }
->

@@ -1,0 +1,52 @@
+digraph dfd_vet_context {
+    label="Diagrama de Contexto\n ";
+    labelloc="t";
+
+    node [
+        shape=record
+    ]
+
+    subgraph external_entities {
+        admin [
+            label="Administrador"
+            shape=box
+        ];
+        user [
+            label="Usuario"
+            shape=box
+        ];
+    }
+
+    subgraph system {
+        process0 [
+            label="{<f0>0.0|<f1>Sistema de\nTurnos Veterinarios}"
+            shape=Mrecord
+        ];
+    }
+
+    ## Especies:
+    admin -> process0 [label="(1) Crear especie"]
+    process0 -> user [label="(2) Listar especies"]
+    admin -> process0 [label="(3) Editar especie"]
+    admin -> process0 [label="(4) Eliminar especie"]
+
+    ## Veterinarios:
+    admin -> process0 [label="(5) Crear veterinario"]
+    process0 -> admin [label="(6) Listar veterinarios"]
+    admin -> process0 [label="(7) Editar veterinario"]
+    admin -> process0 [label="(8) Eliminar veterinario"]
+
+    ## Mascotas:
+    user -> process0 [label="(9) Crear mascota"]
+    process0 -> admin [label="(10) Listar mascotas"]
+    user -> process0 [label="(11) Editar mascota"]
+    user -> process0 [label="(12) Eliminar mascota"]
+
+    ## Turnos:
+    process0 -> user [label="(13) Turnos disponibles"]
+    user -> process0 [label="(14) Tomar turno"]
+    admin -> process0 [label="(15) Listar turnos"]
+    admin -> process0 [label="(16) Cancelar turno"]
+
+    {rank=same; admin; process0; user;}
+}

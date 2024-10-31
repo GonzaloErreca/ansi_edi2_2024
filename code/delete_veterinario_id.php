@@ -1,15 +1,16 @@
 <?php
 
-function handle_request($id, $input) {
+function handle_request($id, $input)
+{
     $db = new SQLite3('database.sqlite');
-    $id = $db->querySingle("SELECT id FROM veterinarios WHERE id = {$id}");
-
-    if (empty($id)) {
-        header('HTTP/1.1 404 Not Found');
-    } else {
-        $db->exec("DELETE FROM veterinarios WHERE id = {$id}");
-        $db->exec("DELETE FROM turnos WHERE veterinarios_id = {$id}");
-    }
-
+    $row = $db->querySingle("SELECT id, nombre FROM veterinario WHERE id = {$id}", true);
+    $db->exec("DELETE FROM veterinario WHERE id={$id}");
     $db->close();
+
+    $veterinario = [
+        'id' => $id,
+        'nombre' => $row['nombre'],
+    ];
+
+    echo json_encode($veterinario);
 }

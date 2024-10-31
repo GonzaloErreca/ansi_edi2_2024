@@ -4,11 +4,11 @@
 header('Content-Type: application/json');
 
 // @see https://stackoverflow.com/a/61856861
-header("Access-Control-Allow-Origin: *");
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-header("Access-Control-Allow-Headers: Content-Type, Accept, Origin, Access-Control-Allow-Headers");
+header('Access-Control-Allow-Headers: Content-Type, Accept, Origin, Access-Control-Allow-Headers');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if ('OPTIONS' === $_SERVER['REQUEST_METHOD']) {
     return;
 }
 
@@ -33,9 +33,15 @@ $id = null;
 // Get 'resource' and 'id' values
 if ($path) {
     $path = explode('/', $path);
-    $resource = $path[0];
-    if (!empty($path[1])) {
-        $id = (int) $path[1];
+    $resource = array_shift($path);
+    array_walk($path, function (&$item) {
+        if (is_numeric($item)) {
+            $item = (int) $item;
+        }
+    });
+    $id = $path;
+    if (1 == count($path)) {
+        $id = $path[0];
     }
 }
 
@@ -49,8 +55,8 @@ if ('post' == $method || 'put' == $method) {
 
 // File name (convention) from where the logic will be loaded
 $fileName = strtolower("{$method}_{$resource}");
-$fileName.= $id ? '_id' : '';
-$fileName.= '.php';
+$fileName .= $id ? '_id' : '';
+$fileName .= '.php';
 
 // The logic must be under the `code` directory
 $fileName = "code/{$fileName}";
@@ -65,7 +71,7 @@ $functionName = 'handle_request';
 
 // Load and call the logic that handles the request
 if (is_readable($fileName)) {
-    require_once($fileName);
+    require_once $fileName;
     if (function_exists($functionName)) {
         $functionName($id, $input);
         exit;

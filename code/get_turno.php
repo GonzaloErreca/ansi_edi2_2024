@@ -5,12 +5,13 @@ function handle_request()
     $list = [];
 
     $db = new SQLite3('database.sqlite');
-    $result = $db->query('SELECT * FROM veterinario');
+    $result = $db->query('SELECT * FROM turno');
 
     while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
         $list[] = [
-            'id' => $row['id'],
-            'nombre' => $row['nombre'],
+            'turno' => $row['turno'],
+            'mascota_id' => $row['mascota_id'],
+            'veterinario_id' => $row['veterinario_id'],
         ];
     }
 

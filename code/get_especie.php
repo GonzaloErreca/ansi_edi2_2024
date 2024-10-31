@@ -1,16 +1,16 @@
 <?php
 
-function handle_request($id, $input) {
+function handle_request()
+{
     $list = [];
 
     $db = new SQLite3('database.sqlite');
-    $result = $db->query("SELECT * FROM especies");
+    $result = $db->query('SELECT * FROM especie');
 
     while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
         $list[] = [
             'id' => $row['id'],
-            'name' => $row['nombre'],
-
+            'nombre' => $row['nombre'],
         ];
     }
 
@@ -18,4 +18,3 @@ function handle_request($id, $input) {
 
     echo json_encode($list);
 }
->

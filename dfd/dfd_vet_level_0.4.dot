@@ -1,0 +1,51 @@
+digraph dfd_vet_level_0_4 {
+    node [
+        shape=record
+    ]
+
+    subgraph external_entities {
+        admin [
+            label="Administrador"
+            shape=box
+        ];
+        user [
+            label="Usuario"
+            shape=box
+        ];
+    }
+
+    subgraph cluster_system {
+        label="Diagrama 0.4";
+        labelloc="b";
+
+        process40 [
+            label="{<f0>4.0|<f1>CRUD Turno}"
+            shape=Mrecord
+        ];
+
+        store20 [
+            label="<f0> |<f1> Veterinario"
+        ];
+        store30 [
+            label="<f0> |<f1> Mascota"
+        ];
+        store40 [
+            label="<f0> |<f1> Turno"
+        ];
+
+        {rank=same; l1[style=invis, shape=point]; process40;}
+        {rank=same; l2[style=invis, shape=point]; store20; store30; store40;}
+    }
+
+    ## Turnos:
+    process40 -> user [label="(13) Turnos disponibles"]
+    user -> process40 [label="(14) Tomar turno"]
+    process40 -> admin [label="(15) Listar turnos"]
+    admin -> process40 [label="(16) Cancelar turno"]
+
+    store20 -> process40 [label="(22) Obtener veterinarios"]
+    store30 -> process40 [label="(26) Obtener mascotas"]
+    process40 -> store40 [label="(29) Guardar turno"]
+    store40 -> process40 [label="(30) Obtener turnos"]
+    process40 -> store40 [label="(31) Eliminar turno"]
+}

@@ -1,21 +1,18 @@
 <?php
 
-function handle_request($id, $input) {
-        $imput=json_decode($imput,true);
-	$db=new SQLite3('database.sqlite');
-	$query=$db->exec("UPDATEmascotasSETnombre='{$input['name']}'WEREid={$id}");
-	if($db->change()>0){
-	   $mascota=$db->querySingle("SELECTid,nombreFROMmascotasWHEREid={$id}",true);
-	   echo json_encode([
-		   'id'=>$mascota['id']
-		   'name'=>$mascota[nombre],
-  	   ]);
-	  }else{
-            echo json_encode([
-  	      'error'=>'No se encontró la mascota con ese ID o no se realizaron cambios'
-	    ]);
-	   }
-	   $db->close();	
-	  }
-        
+function handle_request($id, $input)
+{
+    $input = json_decode($input, true);
 
+    $db = new SQLite3('database.sqlite');
+    $db->exec("UPDATE mascota SET nombre = '{$input['nombre']}', especie_id = '{$input['especie_id']}' WHERE id = {$id}");
+    $db->close();
+
+    $mascota = [
+        'id' => $id,
+        'nombre' => $input['nombre'],
+        'especie_id' => $input['especie_id'],
+    ];
+
+    echo json_encode($mascota);
+}

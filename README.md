@@ -10,12 +10,12 @@
 
 ## Requerimientos no funcionales
 
-- Leguaje: PHP
+- Lenguaje: PHP
 - Base de datos: SQlite
-- editor: vim
+- Editor: vim
 - API REST
 - Interfaz de usuario web
-- Metodo de desarrollo TDD
+- Método de desarrollo TDD
 
 ## Requerimientos funcionales
 
@@ -25,10 +25,10 @@
 - CRUD Mascotas
 - Turnos ilimitados por usuario
 - Mascota es usuario
-- Cada entidad tendra su ID
+- Cada entidad tendrá su ID
 - Cada turno dura una hora, tiene una mascota y un profesional
-- Por dia son 8 turnos, de cualquier profesional
-- Visualizacion de turnos disponibles (horarios libres)
+- Por día son 8 turnos, de cualquier profesional
+- Visualización de turnos disponibles (horarios libres)
 
 ## Historias de usuario
 
@@ -41,4 +41,4 @@
 
 ## Alcance
 
-- Tener una app para sacar turnos en una veterinaria y que su interfaz sea una pagina web que consuma una API REST en la cual va a estar ubicada la logica.
+- Tener una aplicación para sacar turnos en una veterinaria y que su interfaz sea una pagina web que consuma una API REST en la cual va a estar ubicada la lógica.

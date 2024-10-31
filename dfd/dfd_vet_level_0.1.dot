@@ -1,0 +1,44 @@
+digraph dfd_vet_level_0_1 {
+    node [
+        shape=record
+    ]
+
+    subgraph external_entities {
+        admin [
+            label="Administrador"
+            shape=box
+        ];
+        user [
+            label="Usuario"
+            shape=box
+        ];
+    }
+
+    subgraph cluster_system {
+        label="Diagrama 0.1";
+        labelloc="b";
+
+        process10 [
+            label="{<f0>1.0|<f1>CRUD Especie}"
+            shape=Mrecord
+        ];
+
+        store10 [
+            label="<f0> |<f1> Especie"
+        ];
+
+        {rank=same; l1[style=invis, shape=point]; process10;}
+        {rank=same; l2[style=invis, shape=point]; store10;}
+    }
+
+    ## Especies:
+    admin -> process10 [label="(1) Crear especie"]
+    process10 -> user [label="(2) Listar especies"]
+    admin -> process10 [label="(3) Editar especie"]
+    admin -> process10 [label="(4) Eliminar especie"]
+
+    process10 -> store10 [label="(17) Guardar especie"]
+    store10 -> process10 [label="(18) Obtener especies"]
+    process10 -> store10 [label="(19) Actualizar especie"]
+    process10 -> store10 [label="(20) Eliminar especie"]
+}
